@@ -32,13 +32,36 @@ parser code {:
 terminal CLASS, INT, BOOL, VOID, TRUE, FALSE, AND, OR, NOT, IF, ELSE, FOR, WHILE, RETURN; 
 terminal EQ, EQEQ, NOTEQ, GT, LT, PLUS, MINUS, TIMES, DIVIDE; 
 terminal COMMA, SEMI, LPAREN, RPAREN, LCURLY, RCURLY;
-terminal IDENT, LIT;
+terminal IDENT, NUM;
+terminal EMPTY;
 
+non terminal program;
 non terminal type, attr;
+non terminal logic_oper, rel_oper, const_bool, exp_bool, term_bool, factor_bool;
+non terminal method_call_arit, args_arit, exp_arit, term_arit, factor_arit;
 
-start with attr;
+start with program;
+
+program ::= exp_arit;
+
+type ::= INT | BOOL;
 
 attr ::= type IDENT SEMI;
 
-type ::= INT | BOOL;
+// boolean expression
+logic_oper ::= AND | OR;
+rel_oper ::= EQEQ | GT | LT | NOTEQ;
+const_bool ::= TRUE | FALSE;
+
+exp_bool ::= term_bool | term_bool logic_oper exp_bool;
+term_bool ::= factor_bool | factor_bool rel_oper term_bool;
+factor_bool ::= NOT factor_bool | const_bool | IDENT | LPAREN exp_bool RPAREN;
+
+// arithmetic expression
+exp_arit ::= term_arit | term_arit PLUS exp_arit;
+term_arit ::= factor_arit | factor_arit TIMES term_arit;
+factor_arit ::= NUM | IDENT | method_call_arit | LPAREN exp_arit RPAREN;
+
+method_call_arit ::= IDENT LPAREN RPAREN | IDENT LPAREN args_arit RPAREN;
+args_arit ::= exp_arit | exp_arit COMMA args_arit | EMPTY;
 

@@ -30,44 +30,44 @@ ID = {ALPHA}({ALPHA}|{DIGIT})*
 
 /* RWORDS */
 
-"class"            { System.out.print(" class "); return symbol(sym.CLASS); }
-"int"              { System.out.print(" int "); return symbol(sym.INT); }
-"bool"             { System.out.print(" bool "); return symbol(sym.BOOL); }
-"void"             { System.out.print(" void "); return symbol(sym.VOID); }
-"True"             { System.out.print(" True "); return symbol(sym.TRUE); }
-"False"            { System.out.print(" False "); return symbol(sym.FALSE); }
-"and"              { System.out.print(" and "); return symbol(sym.AND); }
-"or"               { System.out.print(" or "); return symbol(sym.OR); }
-"not"              { System.out.print(" not "); return symbol(sym.NOT); }
-"if"               { System.out.print(" if "); return symbol(sym.IF); }
-"else"             { System.out.print(" else "); return symbol(sym.ELSE); }
-"for"              { System.out.print(" for "); return symbol(sym.FOR); }
-"while"            { System.out.print(" while "); return symbol(sym.WHILE); }
-"return"           { System.out.print(" return "); return symbol(sym.RETURN); }
+"class"            { return symbol(sym.CLASS); }
+"int"              { return symbol(sym.INT); }
+"bool"             { return symbol(sym.BOOL); }
+"void"             { return symbol(sym.VOID); }
+"True"             { return symbol(sym.TRUE); }
+"False"            { return symbol(sym.FALSE); }
+"and"              { return symbol(sym.AND); }
+"or"               { return symbol(sym.OR); }
+"not"              { return symbol(sym.NOT); }
+"if"               { return symbol(sym.IF); }
+"else"             { return symbol(sym.ELSE); }
+"for"              { return symbol(sym.FOR); }
+"while"            { return symbol(sym.WHILE); }
+"return"           { return symbol(sym.RETURN); }
 
 /* OPERATORS */
 
-"="                { System.out.print(" = "); return symbol(sym.EQ); }
-"=="               { System.out.print(" == "); return symbol(sym.EQEQ); }
-"!="               { System.out.print(" != "); return symbol(sym.NOTEQ); }
-">"                { System.out.print(" > "); return symbol(sym.GT); }
-"<"                { System.out.print(" < "); return symbol(sym.LT); }
-"+"                { System.out.print(" + "); return symbol(sym.PLUS); }
-"-"                { System.out.print(" - "); return symbol(sym.MINUS); }
-"*"                { System.out.print(" * "); return symbol(sym.TIMES); }
-"/"                { System.out.print(" / "); return symbol(sym.DIVIDE); }
+"="                { return symbol(sym.EQ); }
+"=="               { return symbol(sym.EQEQ); }
+"!="               { return symbol(sym.NOTEQ); }
+">"                { return symbol(sym.GT); }
+"<"                { return symbol(sym.LT); }
+"+"                { return symbol(sym.PLUS); }
+"-"                { return symbol(sym.MINUS); }
+"*"                { return symbol(sym.TIMES); }
+"/"                { return symbol(sym.DIVIDE); }
 
 /* PUNTUACTION */
 
-","                { System.out.print(" , "); return symbol(sym.COMMA); }
-";"                { System.out.print(" ; "); return symbol(sym.SEMI); }
-"("                { System.out.print(" ( "); return symbol(sym.LPAREN); }
-")"                { System.out.print(" ) "); return symbol(sym.RPAREN); }
-"{"                { System.out.print(" { "); return symbol(sym.LCURLY); }
-"}"                { System.out.print(" } "); return symbol(sym.RCURLY); }
+","                { return symbol(sym.COMMA); }
+";"                { return symbol(sym.SEMI); }
+"("                { return symbol(sym.LPAREN); }
+")"                { return symbol(sym.RPAREN); }
+"{"                { return symbol(sym.LCURLY); }
+"}"                { return symbol(sym.RCURLY); }
 
-{ID}                                         { System.out.print(yytext()); return symbol(sym.IDENT, new String(yytext())); }
-{DIGIT}+                                     { System.out.print(yytext()); return symbol(sym.LIT, new String(yytext())); }
+{ID}                                         { return symbol(sym.IDENT, new String(yytext())); }
+{DIGIT}+                                     { return symbol(sym.NUM, new String(yytext())); }
 
 {NEWLINE}                                     { }
 {NONNEWLINE_WHITE_SPACE_CHAR}+                { }
