@@ -5,7 +5,7 @@ compile:
 
 	jflex -d gen/classes lex.flex
 
-	java -jar util/java-cup-11b-20160615.jar -interface -expect 11 < sin.cup
+	java -jar util/java-cup-11b-20160615.jar -interface -expect 100 < sin.cup
 
 	mv parser.java sym.java gen/classes/
 
@@ -15,4 +15,5 @@ clean:
 	rm -rf gen
 
 test: 
-	java -cp util/java-cup-11b-20160615.jar:gen Main tests/test.in 
+	java -cp util/java-cup-11b-20160615.jar:gen Main tests/test.in > tests/test.out
+	cat tests/test.out

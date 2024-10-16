@@ -36,7 +36,7 @@ terminal IDENT, NUM;
 
 non terminal program;
 non terminal method_type, type;
-non terminal logic_oper, rel_oper, const_bool, exp_bool, term_bool, factor_bool;
+non terminal logic_oper, bool_oper, eq_rel_oper, rel_oper, num_rel_oper, const_bool, exp_bool, term_bool, factor_bool;
 non terminal args_arit, exp_arit, term_arit, factor_arit;
 non terminal ret_stat, ret_val;
 non terminal assign, attr_decl, attr_decl_list;
@@ -55,11 +55,13 @@ method_type ::= VOID | type;
 
 // boolean expression
 logic_oper ::= AND | OR;
-rel_oper ::= EQEQ | GT | LT | NOTEQ;
+eq_rel_oper ::= EQEQ | NOTEQ;
+bool_oper ::= logic_oper | eq_rel_oper;
+num_rel_oper ::= GT | LT | eq_rel_oper;
 const_bool ::= TRUE | FALSE;
 
-exp_bool ::= term_bool | term_bool logic_oper exp_bool;
-term_bool ::= factor_bool | factor_bool rel_oper term_bool;
+exp_bool ::= term_bool | term_bool bool_oper exp_bool;
+term_bool ::= factor_bool | NUM num_rel_oper NUM;
 factor_bool ::= NOT factor_bool | const_bool | IDENT | LPAREN exp_bool RPAREN;
 
 // arithmetic expression
@@ -75,14 +77,12 @@ ret_val ::= exp_bool | exp_arit;
 assign ::= IDENT EQ ret_val;
 
 // method_call
-// method_call ::= IDENT LPAREN method_call_args RPAREN;
-// method_call_args ::= method_call_val method_call_args | COMMA method_call_val method_call_args | ;  
-// method_call_val ::= IDENT | exp_arit | exp_bool;
+method_call ::= IDENT LPAREN method_call_args RPAREN;
+method_call_args ::= method_call_val method_call_args | COMMA method_call_val method_call_args | ;  
+method_call_val ::= IDENT | exp_arit | exp_bool;
 
-// method_call ::= IDENT LPAREN RPAREN;
-
-method_call ::= IDENT LPAREN method_call_val RPAREN;
-method_call_val ::= IDENT | NUM | const_bool |;
+// method_call ::= IDENT LPAREN method_call_val RPAREN;
+// method_call_val ::= IDENT | exp_arit | exp_bool |;
 
 // attribute declaration 
 attr_decl ::= type IDENT SEMI;
