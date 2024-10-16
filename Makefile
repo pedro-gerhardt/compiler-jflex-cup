@@ -5,7 +5,7 @@ compile:
 
 	jflex -d gen/classes lex.flex
 
-	java -jar util/java-cup-11b-20160615.jar -interface < sin.cup
+	java -jar util/java-cup-11b-20160615.jar -interface -expect 11 < sin.cup
 
 	mv parser.java sym.java gen/classes/
 

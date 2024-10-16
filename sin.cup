@@ -33,20 +33,25 @@ terminal CLASS, INT, BOOL, VOID, TRUE, FALSE, AND, OR, NOT, IF, ELSE, FOR, WHILE
 terminal EQ, EQEQ, NOTEQ, GT, LT, PLUS, MINUS, TIMES, DIVIDE; 
 terminal COMMA, SEMI, LPAREN, RPAREN, LCURLY, RCURLY;
 terminal IDENT, NUM;
-terminal EMPTY;
 
 non terminal program;
-non terminal type, attr;
+non terminal method_type, type;
 non terminal logic_oper, rel_oper, const_bool, exp_bool, term_bool, factor_bool;
-non terminal method_call_arit, args_arit, exp_arit, term_arit, factor_arit;
+non terminal args_arit, exp_arit, term_arit, factor_arit;
+non terminal ret_stat, ret_val;
+non terminal assign, attr_decl, attr_decl_list;
+non terminal method_call, method_call_val, method_call_args, method_decl_list;
+non terminal if_stmt, else_stmt;
+non terminal method_decl, method_decl_args, method_decl_val;
+non terminal command, commands, command_with_semi, not_if_command;
+non terminal class_decl;
 
 start with program;
 
-program ::= exp_arit;
+program ::= class_decl;
 
 type ::= INT | BOOL;
-
-attr ::= type IDENT SEMI;
+method_type ::= VOID | type;
 
 // boolean expression
 logic_oper ::= AND | OR;
@@ -60,8 +65,45 @@ factor_bool ::= NOT factor_bool | const_bool | IDENT | LPAREN exp_bool RPAREN;
 // arithmetic expression
 exp_arit ::= term_arit | term_arit PLUS exp_arit;
 term_arit ::= factor_arit | factor_arit TIMES term_arit;
-factor_arit ::= NUM | IDENT | method_call_arit | LPAREN exp_arit RPAREN;
+factor_arit ::= NUM | IDENT | method_call | LPAREN exp_arit RPAREN;
 
-method_call_arit ::= IDENT LPAREN RPAREN | IDENT LPAREN args_arit RPAREN;
-args_arit ::= exp_arit | exp_arit COMMA args_arit | EMPTY;
+// return
+ret_stat ::= RETURN ret_val;
+ret_val ::= exp_bool | exp_arit;
 
+// assign
+assign ::= IDENT EQ ret_val;
+
+// method_call
+// method_call ::= IDENT LPAREN method_call_args RPAREN;
+// method_call_args ::= method_call_val method_call_args | COMMA method_call_val method_call_args | ;  
+// method_call_val ::= IDENT | exp_arit | exp_bool;
+
+// method_call ::= IDENT LPAREN RPAREN;
+
+method_call ::= IDENT LPAREN method_call_val RPAREN;
+method_call_val ::= IDENT | NUM | const_bool |;
+
+// attribute declaration 
+attr_decl ::= type IDENT SEMI;
+attr_decl_list ::= attr_decl | attr_decl attr_decl_list | ;
+
+// commands (add all 4 commands type)
+command_with_semi ::= not_if_command SEMI;
+not_if_command ::= ret_stat | assign | method_call;
+command ::= command_with_semi | if_stmt;
+commands ::= command | command commands | ;
+
+// if statement
+if_stmt ::= IF LPAREN exp_bool RPAREN command else_stmt;
+else_stmt ::= | ELSE command;
+
+// method declaration
+method_decl ::= method_type IDENT LPAREN method_decl_args RPAREN LCURLY commands RCURLY;
+method_decl_args ::= method_decl_val method_decl_args | COMMA method_decl_val method_decl_args | ;
+method_decl_val ::= type IDENT;
+
+method_decl_list ::= method_decl | method_decl method_decl_list | ;
+
+// class declaration
+class_decl ::= CLASS IDENT LCURLY attr_decl_list method_decl_list RCURLY;
