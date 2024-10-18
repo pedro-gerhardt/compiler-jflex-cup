@@ -16,4 +16,5 @@ clean:
 
 test: 
 	java -cp util/java-cup-11b-20160615.jar:gen Main tests/test.in > tests/test.out
+	
 	cat tests/test.out

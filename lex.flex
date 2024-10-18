@@ -41,8 +41,6 @@ ID = {ALPHA}({ALPHA}|{DIGIT})*
 "not"              { return symbol(sym.NOT); }
 "if"               { return symbol(sym.IF); }
 "else"             { return symbol(sym.ELSE); }
-"for"              { return symbol(sym.FOR); }
-"while"            { return symbol(sym.WHILE); }
 "return"           { return symbol(sym.RETURN); }
 
 /* OPERATORS */
@@ -53,9 +51,7 @@ ID = {ALPHA}({ALPHA}|{DIGIT})*
 ">"                { return symbol(sym.GT); }
 "<"                { return symbol(sym.LT); }
 "+"                { return symbol(sym.PLUS); }
-"-"                { return symbol(sym.MINUS); }
 "*"                { return symbol(sym.TIMES); }
-"/"                { return symbol(sym.DIVIDE); }
 
 /* PUNTUACTION */
 

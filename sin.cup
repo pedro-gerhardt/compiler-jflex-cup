@@ -6,15 +6,16 @@ parser code {:
 
         if (info instanceof java_cup.runtime.Symbol) {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s != null){
+                if (s.value != null) {
+                    m.append(": value: " + s.value.toString() + " - ");
+                }
 
-            if (s.value != null) {
-                m.append(": value: " + s.value.toString() + " - ");
-            }
-
-            if (s.left >= 0) {
-                m.append("in line "+(s.left+1));
-                if (s.right >= 0)
-                    m.append(", column "+(s.right+1));
+                if (s.left >= 0) {
+                    m.append("in line "+(s.left+1));
+                    if (s.right >= 0)
+                        m.append(", column "+(s.right+1));
+                }
             }
         }
 
@@ -29,81 +30,199 @@ parser code {:
     }
 :};
 
-terminal CLASS, INT, BOOL, VOID, TRUE, FALSE, AND, OR, NOT, IF, ELSE, FOR, WHILE, RETURN; 
-terminal EQ, EQEQ, NOTEQ, GT, LT, PLUS, MINUS, TIMES, DIVIDE; 
+terminal CLASS, INT, BOOL, VOID, TRUE, FALSE, AND, OR, NOT, IF, ELSE, RETURN; 
+terminal EQ, EQEQ, NOTEQ, GT, LT, PLUS, TIMES; 
 terminal COMMA, SEMI, LPAREN, RPAREN, LCURLY, RCURLY;
 terminal IDENT, NUM;
 
-non terminal program;
-non terminal method_type, type;
-non terminal logic_oper, bool_oper, eq_rel_oper, rel_oper, num_rel_oper, const_bool, exp_bool, term_bool, factor_bool;
-non terminal args_arit, exp_arit, term_arit, factor_arit;
-non terminal ret_stat, ret_val;
-non terminal assign, attr_decl, attr_decl_list;
-non terminal method_call, method_call_val, method_call_args, method_decl_list;
-non terminal if_stmt, else_stmt;
-non terminal method_decl, method_decl_args, method_decl_val;
-non terminal command, commands, command_with_semi, not_if_command;
-non terminal class_decl;
+non terminal Node program;
+non terminal Node method_type, type;
+non terminal Node logic_oper, bool_oper, eq_rel_oper, rel_oper, num_rel_oper, const_bool, exp_bool, term_bool, factor_bool;
+non terminal Node args_arit, exp_arit, term_arit, factor_arit;
+non terminal Node ret_stat, ret_val;
+non terminal Node assign, attr_decl, attr_decl_list;
+non terminal Node method_call, method_call_val, method_call_args, method_decl_list;
+non terminal Node if_stmt, else_stmt;
+non terminal Node method_decl, method_decl_args, method_decl_val;
+non terminal Node command, commands, command_with_semi, not_if_command;
+non terminal Node class_decl;
 
 start with program;
 
-program ::= class_decl;
+program ::= class_decl:cd
+            {: RESULT = cd; :};
 
-type ::= INT | BOOL;
-method_type ::= VOID | type;
+type ::= INT 
+        {: RESULT = new Node("int"); :}
+        | BOOL
+        {: RESULT = new Node("bool"); :};
+        
+method_type ::= VOID 
+        {: RESULT = new Node("void"); :}
+        | type:t
+        {: RESULT = t; :};
 
 // boolean expression
-logic_oper ::= AND | OR;
-eq_rel_oper ::= EQEQ | NOTEQ;
-bool_oper ::= logic_oper | eq_rel_oper;
-num_rel_oper ::= GT | LT | eq_rel_oper;
-const_bool ::= TRUE | FALSE;
+logic_oper ::= AND 
+            {: RESULT = new Node("and"); :}
+            | OR
+            {: RESULT = new Node("or"); :};
 
-exp_bool ::= term_bool | term_bool bool_oper exp_bool;
-term_bool ::= factor_bool | NUM num_rel_oper NUM;
-factor_bool ::= NOT factor_bool | const_bool | IDENT | LPAREN exp_bool RPAREN;
+eq_rel_oper ::= EQEQ 
+            {: RESULT = new Node("=="); :}
+            | NOTEQ
+            {: RESULT = new Node("!="); :};
+
+bool_oper ::= logic_oper:lo
+            {: RESULT = lo; :} 
+            | eq_rel_oper: ero
+            {: RESULT = ero; :};
+
+num_rel_oper ::= GT 
+            {: RESULT = new Node(">"); :}
+            | LT 
+            {: RESULT = new Node("<"); :}
+            | eq_rel_oper:ero
+            {: RESULT = ero; :};
+
+const_bool ::= TRUE:t
+            {: RESULT = new Node("True"); :}
+            | FALSE
+            {: RESULT = new Node("False"); :};
+
+exp_bool ::= term_bool:tb 
+            {: RESULT = tb; :}
+            | term_bool:tb bool_oper:bo exp_bool:eo
+            {: RESULT = new Node(bo != null ? bo.toString() : "bool oper", tb, eo); :};
+
+term_bool ::= factor_bool:fb
+            {: RESULT = fb; :}
+            | NUM:num1 num_rel_oper:nro NUM:num2
+            {: RESULT = new Node(nro != null ? nro.toString() : "num rel oper", new Node(num1 != null ? num1.toString() : "num1"), new Node(num2 != null ? num2.toString() : "num2")); :};
+
+factor_bool ::= NOT:not factor_bool:fb 
+            {: RESULT = new Node("not", fb); :}
+            | const_bool:cb 
+            {: RESULT = cb; :}
+            | IDENT:id
+            {: RESULT = new Node(id != null ? id.toString() : "ID"); :}
+            | LPAREN:lp exp_bool:eb RPAREN:rp
+            {: RESULT = new Node("bool expr", new Node("("), eb, new Node(")")); :};
 
 // arithmetic expression
-exp_arit ::= term_arit | term_arit PLUS exp_arit;
-term_arit ::= factor_arit | factor_arit TIMES term_arit;
-factor_arit ::= NUM | IDENT | method_call | LPAREN exp_arit RPAREN;
+exp_arit ::= term_arit:ta 
+            {: RESULT = ta; :}
+            | term_arit:ta PLUS exp_arit:ea
+            {: RESULT = new Node("+", ta, ea); :};
+
+term_arit ::= factor_arit:fa 
+            {: RESULT = fa; :}
+            | factor_arit:fa TIMES term_arit:ta
+            {: RESULT = new Node("*", fa, ta); :};
+
+factor_arit ::= NUM:num
+            {: RESULT = new Node(num != null ? num.toString() : "num"); :}
+            | IDENT:id
+            {: RESULT = new Node(id != null ? id.toString() : "ID"); :}            
+            | method_call:mc 
+            {: RESULT = mc; :}
+            | LPAREN exp_arit:ea RPAREN
+            {: RESULT = new Node("arit expr", new Node("("), ea, new Node(")")); :};
 
 // return
-ret_stat ::= RETURN ret_val;
-ret_val ::= exp_bool | exp_arit;
+ret_stat ::= RETURN ret_val:rv
+            {: RESULT = new Node("return", rv); :};
+ret_val ::= exp_bool:eb 
+            {: RESULT = eb; :}
+            | exp_arit:ea
+            {: RESULT = ea; :};
 
 // assign
-assign ::= IDENT EQ ret_val;
+assign ::= IDENT:id EQ ret_val:rv
+            {: RESULT = new Node("assign", new Node(id != null ? id.toString() : "ID"), new Node("="), rv); :};
 
 // method_call
-method_call ::= IDENT LPAREN method_call_args RPAREN;
-method_call_args ::= method_call_val method_call_args | COMMA method_call_val method_call_args | ;  
-method_call_val ::= IDENT | exp_arit | exp_bool;
+method_call ::= IDENT:id LPAREN method_call_args:mca RPAREN
+            {: RESULT = new Node("method call", new Node(id != null ? id.toString() : "ID"), new Node("("), mca, new Node(")")); :};
 
-// method_call ::= IDENT LPAREN method_call_val RPAREN;
-// method_call_val ::= IDENT | exp_arit | exp_bool |;
+method_call_args ::= method_call_val:mcv method_call_args:mca
+            {: RESULT = new Node("method call args", mcv, mca); :}
+            | COMMA method_call_val:mcv method_call_args:mca 
+            {: RESULT = new Node("method call args", new Node(","), mcv, mca); :}
+            | 
+            {: RESULT = new Node(""); :};  
+
+method_call_val ::= IDENT:id
+            {: RESULT = new Node(id != null ? id.toString() : "ID"); :}
+            | exp_arit:ea 
+            {: RESULT = ea; :}
+            | exp_bool:eb
+            {: RESULT = eb; :};
 
 // attribute declaration 
-attr_decl ::= type IDENT SEMI;
-attr_decl_list ::= attr_decl | attr_decl attr_decl_list | ;
+attr_decl ::= type:t IDENT:id SEMI
+            {: RESULT = new Node("attr_decl", t, new Node(id != null ? id.toString() : "id"), new Node(";")); :};
+
+attr_decl_list ::= attr_decl:ad 
+            {: RESULT = ad; :}
+            | attr_decl:ad attr_decl_list:adl 
+            {: RESULT = new Node("attr decl list", ad, adl); :}
+            | 
+            {: RESULT = null; :};
 
 // commands (add all 4 commands type)
-command_with_semi ::= not_if_command SEMI;
-not_if_command ::= ret_stat | assign | method_call;
-command ::= command_with_semi | if_stmt;
-commands ::= command | command commands | ;
+command_with_semi ::= not_if_command:nic SEMI
+            {: RESULT = new Node("not if command", nic, new Node(";")); :};
+
+not_if_command ::= ret_stat:rs 
+            {: RESULT = rs; :}
+            | assign:a 
+            {: RESULT = a; :}
+            | method_call:mc
+            {: RESULT = mc; :};
+
+command ::= command_with_semi:cws 
+            {: RESULT = cws; :}
+            | if_stmt:is
+            {: RESULT = is; :};
+
+commands ::= command:c 
+            {: RESULT = c; :}
+            | command:c commands:cs 
+            {: RESULT = new Node("command list", c, cs); :}
+            | 
+            {: RESULT = null; :};
 
 // if statement
-if_stmt ::= IF LPAREN exp_bool RPAREN command else_stmt;
-else_stmt ::= | ELSE command;
+if_stmt ::= IF LPAREN exp_bool:eb RPAREN command:c else_stmt:es
+            {: RESULT = new Node("if", new Node("("), eb, new Node(")"), c, es); :};
+
+else_stmt ::= 
+            {: RESULT = null; :}
+            | ELSE command:c
+            {: RESULT = new Node("else", c); :};
 
 // method declaration
-method_decl ::= method_type IDENT LPAREN method_decl_args RPAREN LCURLY commands RCURLY;
-method_decl_args ::= method_decl_val method_decl_args | COMMA method_decl_val method_decl_args | ;
-method_decl_val ::= type IDENT;
+method_decl ::= method_type:mt IDENT:id LPAREN method_decl_args:mda RPAREN LCURLY commands:cs RCURLY
+            {: RESULT = new Node("method decl", mt, new Node(id.toString()), new Node("("), mda, new Node(")"), new Node("{"), cs, new Node("}")); :};
 
-method_decl_list ::= method_decl | method_decl method_decl_list | ;
+method_decl_args ::= method_decl_val:mdv method_decl_args:mda 
+            {: RESULT = new Node("method decl args", mdv, mda); :}
+            | COMMA method_decl_val:mdv method_decl_args:mda 
+            {: RESULT = new Node("method decl args", new Node(","), mdv, mda); :}
+            | 
+            {: RESULT = new Node(""); :};
+
+method_decl_val ::= type:t IDENT:id
+            {: RESULT = new Node("method decl val", t, new Node(id.toString())); :};
+
+method_decl_list ::= method_decl:md
+            {: RESULT = md; :}
+            | method_decl:md method_decl_list:mdl 
+            {: RESULT = new Node("method decl list", md, mdl); :}
+            | 
+            {: RESULT = null; :};
 
 // class declaration
-class_decl ::= CLASS IDENT LCURLY attr_decl_list method_decl_list RCURLY;
+class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl method_decl_list:mdl RCURLY
+            {: RESULT = new Node("class decl", new Node("class"), new Node(id.toString()), new Node("{"), adl, mdl, new Node("}")); :};
