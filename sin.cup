@@ -34,6 +34,7 @@ terminal CLASS, INT, BOOL, VOID, TRUE, FALSE, AND, OR, NOT, IF, ELSE, RETURN;
 terminal EQ, EQEQ, NOTEQ, GT, LT, PLUS, TIMES; 
 terminal COMMA, SEMI, LPAREN, RPAREN, LCURLY, RCURLY;
 terminal IDENT, NUM;
+terminal MAIN, WHILE;
 
 non terminal Node program;
 non terminal Node method_type, type;
@@ -46,6 +47,7 @@ non terminal Node if_stmt, else_stmt;
 non terminal Node method_decl, method_decl_args, method_decl_val;
 non terminal Node command, commands, command_with_semi, not_if_command;
 non terminal Node class_decl;
+non terminal Node main_decl, while_stmt;
 
 start with program;
 
@@ -170,7 +172,6 @@ attr_decl_list ::= attr_decl:ad
             | 
             {: RESULT = null; :};
 
-// commands (add all 4 commands type)
 command_with_semi ::= not_if_command:nic SEMI
             {: RESULT = new Node("not if command", nic, new Node(";")); :};
 
@@ -184,7 +185,9 @@ not_if_command ::= ret_stat:rs
 command ::= command_with_semi:cws 
             {: RESULT = cws; :}
             | if_stmt:is
-            {: RESULT = is; :};
+            {: RESULT = is; :}
+            | while_stmt:ws
+            {: RESULT = ws; :};
 
 commands ::= command:c 
             {: RESULT = c; :}
@@ -224,5 +227,12 @@ method_decl_list ::= method_decl:md
             {: RESULT = null; :};
 
 // class declaration
-class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl method_decl_list:mdl RCURLY
-            {: RESULT = new Node("class decl", new Node("class"), new Node(id.toString()), new Node("{"), adl, mdl, new Node("}")); :};
+class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl main_decl:md method_decl_list:mdl RCURLY
+            {: RESULT = new Node("class decl", new Node("class"), new Node(id.toString()), new Node("{"), adl, md, mdl, new Node("}")); :};
+
+// main function
+main_decl ::= VOID MAIN LPAREN RPAREN LCURLY commands:cs RCURLY
+            {: RESULT = new Node("main method decl", new Node("void"), new Node("main"), new Node("("), new Node(")"), new Node("{"), cs, new Node("}")); :};
+
+while_stmt ::= WHILE LPAREN exp_bool:eb RPAREN command:cm
+            {: RESULT = new Node("while stmt", new Node("("), eb, new Node(")"), cm); :};

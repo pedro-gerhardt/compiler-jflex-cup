@@ -15,6 +15,6 @@ clean:
 	rm -rf gen
 
 test: 
-	java -cp util/java-cup-11b-20160615.jar:gen Main tests/test.in > tests/test.out
+	java -cp util/java-cup-11b-20160615.jar:gen Main tests/code.in > tests/ast.out
 	
-	cat tests/test.out
+	cat tests/ast.out

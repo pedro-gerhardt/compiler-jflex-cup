@@ -1,0 +1,5 @@
+ - create symbol table for variable declarations
+ - create TACs as intermediate code for commands 
+
+ * handle WHILE and MAIN in grammar cup, appending them to ast
+ * add WHILE and MAIN to jflex 

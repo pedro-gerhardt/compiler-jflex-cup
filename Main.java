@@ -8,11 +8,9 @@ public class Main {
       Node result = (Node) p.parse().value;
 
       result.printTree(result, "");
-      // System.out.println(result);
       
       System.out.println("Successful compilation!");      
     } catch (Exception e) {
-      /* do cleanup here -- possibly rethrow e */
       e.printStackTrace();
     }
   }

@@ -42,6 +42,8 @@ ID = {ALPHA}({ALPHA}|{DIGIT})*
 "if"               { return symbol(sym.IF); }
 "else"             { return symbol(sym.ELSE); }
 "return"           { return symbol(sym.RETURN); }
+"while"            { return symbol(sym.WHILE); }
+"main"             { return symbol(sym.MAIN); }
 
 /* OPERATORS */
 
