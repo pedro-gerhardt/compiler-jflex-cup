@@ -1,5 +1,9 @@
- - create symbol table for variable declarations
  - create TACs as intermediate code for commands 
+ - update README.md
 
+ * create symbol table for variable and functions declarations
  * handle WHILE and MAIN in grammar cup, appending them to ast
  * add WHILE and MAIN to jflex 
+
+questions:
+ - what should be in the symbol table? (name, type, scope, value)

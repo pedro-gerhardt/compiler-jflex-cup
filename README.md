@@ -13,5 +13,6 @@ jflex and java jdk installed
 # significant files
 - lexical specification: lex.flex
 - grammar specification: sin.cup
-- input test file: tests/test.in 
-- output test file: tests/test.out 
+- input code test file: tests/code.in 
+- output ast file: tests/ast.out 
+- output symbol table file: tests/sym_tab.out 

@@ -1,0 +1,6 @@
+NomeDaClasse - class
+attr1 - var - [int]
+attr2 - var - [bool]
+func - func - [void]
+param - var - [int]
+param2 - var - [bool]

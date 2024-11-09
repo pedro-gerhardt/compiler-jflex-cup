@@ -38,8 +38,8 @@ terminal MAIN, WHILE;
 
 non terminal Node program;
 non terminal Node method_type, type;
-non terminal Node logic_oper, bool_oper, eq_rel_oper, rel_oper, num_rel_oper, const_bool, exp_bool, term_bool, factor_bool;
-non terminal Node args_arit, exp_arit, term_arit, factor_arit;
+non terminal Node logic_oper, bool_oper, eq_rel_oper, num_rel_oper, const_bool, exp_bool, term_bool, factor_bool;
+non terminal Node exp_arit, term_arit, factor_arit;
 non terminal Node ret_stat, ret_val;
 non terminal Node assign, attr_decl, attr_decl_list;
 non terminal Node method_call, method_call_val, method_call_args, method_decl_list;
@@ -61,8 +61,10 @@ type ::= INT
         
 method_type ::= VOID 
         {: RESULT = new Node("void"); :}
-        | type:t
-        {: RESULT = t; :};
+        | INT 
+        {: RESULT = new Node("int"); :}
+        | BOOL
+        {: RESULT = new Node("bool"); :};
 
 // boolean expression
 logic_oper ::= AND 
@@ -107,7 +109,7 @@ factor_bool ::= NOT:not factor_bool:fb
             | const_bool:cb 
             {: RESULT = cb; :}
             | IDENT:id
-            {: RESULT = new Node(id != null ? id.toString() : "ID"); :}
+            {: RESULT = new Node(id != null ? id.toString() : "id"); :}
             | LPAREN:lp exp_bool:eb RPAREN:rp
             {: RESULT = new Node("bool expr", new Node("("), eb, new Node(")")); :};
 
@@ -125,7 +127,7 @@ term_arit ::= factor_arit:fa
 factor_arit ::= NUM:num
             {: RESULT = new Node(num != null ? num.toString() : "num"); :}
             | IDENT:id
-            {: RESULT = new Node(id != null ? id.toString() : "ID"); :}            
+            {: RESULT = new Node(id != null ? id.toString() : "id"); :}            
             | method_call:mc 
             {: RESULT = mc; :}
             | LPAREN exp_arit:ea RPAREN
@@ -141,11 +143,11 @@ ret_val ::= exp_bool:eb
 
 // assign
 assign ::= IDENT:id EQ ret_val:rv
-            {: RESULT = new Node("assign", new Node(id != null ? id.toString() : "ID"), new Node("="), rv); :};
+            {: RESULT = new Node("assign", new Node(id != null ? id.toString() : "id"), new Node("="), rv); :};
 
 // method_call
 method_call ::= IDENT:id LPAREN method_call_args:mca RPAREN
-            {: RESULT = new Node("method call", new Node(id != null ? id.toString() : "ID"), new Node("("), mca, new Node(")")); :};
+            {: RESULT = new Node("method call", new Node(id != null ? id.toString() : "id"), new Node("("), mca, new Node(")")); :};
 
 method_call_args ::= method_call_val:mcv method_call_args:mca
             {: RESULT = new Node("method call args", mcv, mca); :}
@@ -155,7 +157,7 @@ method_call_args ::= method_call_val:mcv method_call_args:mca
             {: RESULT = new Node(""); :};  
 
 method_call_val ::= IDENT:id
-            {: RESULT = new Node(id != null ? id.toString() : "ID"); :}
+            {: RESULT = new Node(id != null ? id.toString() : "id"); :}
             | exp_arit:ea 
             {: RESULT = ea; :}
             | exp_bool:eb
@@ -163,7 +165,9 @@ method_call_val ::= IDENT:id
 
 // attribute declaration 
 attr_decl ::= type:t IDENT:id SEMI
-            {: RESULT = new Node("attr_decl", t, new Node(id != null ? id.toString() : "id"), new Node(";")); :};
+            {:  RESULT = new Node("attr_decl", t, new Node(id != null ? id.toString() : "id"), new Node(";"));
+                RESULT.setAsVarDeclaration(id.toString(), t.toString());
+            :};
 
 attr_decl_list ::= attr_decl:ad 
             {: RESULT = ad; :}
@@ -207,7 +211,9 @@ else_stmt ::=
 
 // method declaration
 method_decl ::= method_type:mt IDENT:id LPAREN method_decl_args:mda RPAREN LCURLY commands:cs RCURLY
-            {: RESULT = new Node("method decl", mt, new Node(id.toString()), new Node("("), mda, new Node(")"), new Node("{"), cs, new Node("}")); :};
+            {: RESULT = new Node("method decl", mt, new Node(id.toString()), new Node("("), mda, new Node(")"), new Node("{"), cs, new Node("}")); 
+                RESULT.setAsFuncDeclaration(id.toString(), mt.toString());
+            :};
 
 method_decl_args ::= method_decl_val:mdv method_decl_args:mda 
             {: RESULT = new Node("method decl args", mdv, mda); :}
@@ -217,7 +223,8 @@ method_decl_args ::= method_decl_val:mdv method_decl_args:mda
             {: RESULT = new Node(""); :};
 
 method_decl_val ::= type:t IDENT:id
-            {: RESULT = new Node("method decl val", t, new Node(id.toString())); :};
+            {: RESULT = new Node("method decl val", t, new Node(id.toString()));
+                RESULT.setAsVarDeclaration(id.toString(), t.toString()); :};
 
 method_decl_list ::= method_decl:md
             {: RESULT = md; :}
@@ -228,11 +235,14 @@ method_decl_list ::= method_decl:md
 
 // class declaration
 class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl main_decl:md method_decl_list:mdl RCURLY
-            {: RESULT = new Node("class decl", new Node("class"), new Node(id.toString()), new Node("{"), adl, md, mdl, new Node("}")); :};
+            {: RESULT = new Node("class decl", new Node("class"), new Node(id.toString()), new Node("{"), adl, md, mdl, new Node("}"));
+                RESULT.setAsClassDeclaration(id.toString());
+             :};
 
 // main function
 main_decl ::= VOID MAIN LPAREN RPAREN LCURLY commands:cs RCURLY
             {: RESULT = new Node("main method decl", new Node("void"), new Node("main"), new Node("("), new Node(")"), new Node("{"), cs, new Node("}")); :};
 
+// while statement
 while_stmt ::= WHILE LPAREN exp_bool:eb RPAREN command:cm
             {: RESULT = new Node("while stmt", new Node("("), eb, new Node(")"), cm); :};

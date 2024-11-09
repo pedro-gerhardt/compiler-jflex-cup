@@ -9,12 +9,14 @@ compile:
 
 	mv parser.java sym.java gen/classes/
 
-	javac -cp util/java-cup-11b-20160615.jar:gen -d gen *.java gen/classes/*.java
+	javac -cp util/java-cup-11b-20160615.jar:gen -d gen javas/*.java gen/classes/*.java
 
 clean:
 	rm -rf gen
 
 test: 
-	java -cp util/java-cup-11b-20160615.jar:gen Main tests/code.in > tests/ast.out
+	java -cp util/java-cup-11b-20160615.jar:gen Main tests/code.in tests/ast.out tests/sym_tab.out
 	
 	cat tests/ast.out
+	
+	cat tests/sym_tab.out
