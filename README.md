@@ -11,6 +11,7 @@ jflex and java jdk installed
 - to full run: make
 
 # significant files
-- grammar specification: lex.flex
+- lexical specification: lex.flex
+- grammar specification: sin.cup
 - input test file: tests/test.in 
 - output test file: tests/test.out 
