@@ -1,13 +1,1 @@
-class NomeDaClasse {
-    int attr1;
-    bool attr2;
-    int teste;
-
-    void main() {
-        func(1, 2);
-    }
-
-    void func(int param, bool param2) { 
-        return param + param2;
-    }
-}
+return True;

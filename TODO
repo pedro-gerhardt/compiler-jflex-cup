@@ -1,6 +1,8 @@
  - create TACs as intermediate code for commands 
  - update README.md
 
+ + resolve grammar conflicts
+
  * create symbol table for variable and functions declarations
  * handle WHILE and MAIN in grammar cup, appending them to ast
  * add WHILE and MAIN to jflex 
@@ -11,3 +13,9 @@ questions:
  * temporary variables created during intermediate code generation should be included in the symbol table?
     * yes
  - how to generate a TAC from a variable being assigned from a method call?
+ - number and boolean constants compose the symbol table? 
+
+topics caption:
+ - up to do
+ + maybe
+ * completed

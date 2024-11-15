@@ -4,6 +4,11 @@ import java.util.HashMap;
 parser code {:
     SymbolTable symbolTable = new SymbolTable();
 
+    int labelCount = 1;
+    public String getNewLabel() {
+        return "L" + labelCount++;
+    }
+
     public void report_error(String message, Object info) {
         StringBuilder m = new StringBuilder("Error");
 
@@ -52,31 +57,40 @@ non terminal Node command, commands, command_with_semi, not_if_command;
 non terminal Node class_decl;
 non terminal Node main_decl, while_stmt;
 
-start with program;
+start with type;
 
 program ::= class_decl:cd
-            {: RESULT = cd; :};
+            {: RESULT = cd; 
+                RESULT.copyTACInfo(cd); :};
 
 type ::= INT 
-        {: RESULT = new Node("int"); :}
+        {: RESULT = new Node("int"); 
+            RESULT.place = "int"; :}
         | BOOL
-        {: RESULT = new Node("bool"); :};
+        {: RESULT = new Node("bool"); 
+            RESULT.place = "bool"; :};
         
 method_type ::= VOID 
-        {: RESULT = new Node("void"); :}
+        {: RESULT = new Node("void"); 
+            RESULT.place = "void"; :}
         | INT 
-        {: RESULT = new Node("int"); :}
+        {: RESULT = new Node("int"); 
+            RESULT.place = "int"; :}
         | BOOL
-        {: RESULT = new Node("bool"); :};
+        {: RESULT = new Node("bool"); 
+            RESULT.place = "bool"; :};
 
 // boolean expression
 logic_oper ::= AND 
-            {: RESULT = new Node("and"); :}
+            {: RESULT = new Node("and"); 
+                RESULT.place = "and"; :}
             | OR
-            {: RESULT = new Node("or"); :};
+            {: RESULT = new Node("or"); 
+                RESULT.place = "or"; :};
 
 eq_rel_oper ::= EQEQ 
-            {: RESULT = new Node("=="); :}
+            {: RESULT = new Node("==");
+                RESULT.place = "=="; :};
             | NOTEQ
             {: RESULT = new Node("!="); 
                 RESULT.place = "!="; :};
@@ -106,23 +120,36 @@ const_bool ::= TRUE:t
                 RESULT.place = "False"; :};
 
 exp_bool ::= term_bool:tb 
-            {: RESULT = tb; :}
+            {: RESULT = tb; 
+                RESULT.copyTACInfo(tb); :}
             | term_bool:tb bool_oper:bo exp_bool:eo
-            {: RESULT = new Node(bo != null ? bo.toString() : "bool oper", tb, eo); :};
+            {: RESULT = new Node(bo != null ? bo.toString() : "bool oper", tb, eo); 
+                RESULT.place = symbolTable.getTempVar("bool");
+                RESULT.code = tb.place + " " + bo.place + " " + eo.place; :};
 
 term_bool ::= factor_bool:fb
-            {: RESULT = fb; :}
+            {: RESULT = fb; 
+                RESULT.copyTACInfo(fb); :}
             | NUM:num1 num_rel_oper:nro NUM:num2
-            {: RESULT = new Node(nro != null ? nro.toString() : "num rel oper", new Node(num1 != null ? num1.toString() : "num1"), new Node(num2 != null ? num2.toString() : "num2")); :};
+            {: RESULT = new Node(nro != null ? nro.toString() : "num rel oper", new Node(num1 != null ? num1.toString() : "num1"), new Node(num2 != null ? num2.toString() : "num2")); 
+                RESULT.place = symbolTable.getTempVar("bool");
+                RESULT.code = num1.toString() + " " + nro.place + " " + num2.toString(); :};
 
 factor_bool ::= NOT:not factor_bool:fb 
-            {: RESULT = new Node("not", fb); :}
+            {: RESULT = new Node("not", fb); 
+                RESULT.place = symbolTable.getTempVar("bool");
+                RESULT.code = "not " + fb.place; :}
             | const_bool:cb 
-            {: RESULT = cb; :}
+            {: RESULT = cb; 
+                RESULT.copyTACInfo(cb); :}
             | IDENT:id
-            {: RESULT = new Node(id != null ? id.toString() : "id"); :}
+            {: RESULT = new Node(id != null ? id.toString() : "id"); 
+                symbolTable.existVariable(id.toString());   
+                RESULT.place = id.toString(); :}
             | LPAREN:lp exp_bool:eb RPAREN:rp
-            {: RESULT = new Node("bool expr", new Node("("), eb, new Node(")")); :};
+            {: RESULT = new Node("bool expr", new Node("("), eb, new Node(")")); 
+                RESULT.place = symbolTable.getTempVar("bool");
+                RESULT.code = RESULT.place + " := " + eb.place; :};
 
 // arithmetic expression
 exp_arit ::= term_arit:ta 
@@ -143,17 +170,14 @@ term_arit ::= factor_arit:fa
 
 factor_arit ::= NUM:num
             {: RESULT = new Node(num != null ? num.toString() : "num"); 
-                System.out.println("++++++++++" + num.toString());
                 RESULT.place = num.toString(); :}
             | IDENT:id
             {: RESULT = new Node(id != null ? id.toString() : "id");
                 symbolTable.existVariable(id.toString());
-                RESULT.place = id.toString();
-            :}            
+                RESULT.place = id.toString(); :}            
             | method_call:mc 
             {: RESULT = mc; 
-                RESULT.place = mc.place;
-            :}
+                RESULT.place = mc.place; :}
             | LPAREN exp_arit:ea RPAREN
             {: RESULT = new Node("arit expr", new Node("("), ea, new Node(")")); 
                 RESULT.place = symbolTable.getTempVar("int");
@@ -161,15 +185,14 @@ factor_arit ::= NUM:num
 
 // return
 ret_stat ::= RETURN ret_val:rv
-            {: RESULT = new Node("return", rv); :};
+            {: RESULT = new Node("return", rv); 
+                System.out.println("chegou aqui!"); :};
 ret_val ::= exp_bool:eb 
             {: RESULT = eb; 
-                RESULT.copyTACInfo(eb);
-            :}
+                RESULT.copyTACInfo(eb); :}
             | exp_arit:ea
             {: RESULT = ea; 
-                RESULT.copyTACInfo(ea);
-            :};
+                RESULT.copyTACInfo(ea); :};
 
 // assign
 assign ::= IDENT:id EQ ret_val:rv
@@ -181,22 +204,27 @@ assign ::= IDENT:id EQ ret_val:rv
 method_call ::= IDENT:id LPAREN method_call_args:mca RPAREN
             {: RESULT = new Node("method call", new Node(id != null ? id.toString() : "id"), new Node("("), mca, new Node(")")); 
                 RESULT.place = id.toString() + "()";
-                RESULT.code = "";
-            :};
+                RESULT.code = "call " + id.toString(); :};
 
 method_call_args ::= method_call_val:mcv method_call_args:mca
-            {: RESULT = new Node("method call args", mcv, mca); :}
+            {: RESULT = new Node("method call args", mcv, mca);
+                RESULT.place = "param " + mcv.place + mca.place; :}
             | COMMA method_call_val:mcv method_call_args:mca 
-            {: RESULT = new Node("method call args", new Node(","), mcv, mca); :}
+            {: RESULT = new Node("method call args", new Node(","), mcv, mca);
+                RESULT.place = "param " + mcv.place + mca.place; :}
             | 
             {: RESULT = new Node(""); :};  
 
 method_call_val ::= IDENT:id
-            {: RESULT = new Node(id != null ? id.toString() : "id"); :}
+            {: RESULT = new Node(id != null ? id.toString() : "id"); 
+                symbolTable.existVariable(id.toString());  
+                RESULT.place = id.toString(); :}  
             | exp_arit:ea 
-            {: RESULT = ea; :}
+            {: RESULT = ea; 
+                RESULT.copyTACInfo(ea); :}
             | exp_bool:eb
-            {: RESULT = eb; :};
+            {: RESULT = eb;
+                RESULT.copyTACInfo(eb); :};
 
 // attribute declaration 
 attr_decl ::= type:t IDENT:id SEMI
@@ -205,50 +233,67 @@ attr_decl ::= type:t IDENT:id SEMI
                 symbolTable.addVariable(id.toString(), t.toString()); :};
 
 attr_decl_list ::= attr_decl:ad 
-            {: RESULT = ad; :}
+            {: RESULT = ad; 
+                RESULT.copyTACInfo(ad); :}
             | attr_decl:ad attr_decl_list:adl 
             {: RESULT = new Node("attr decl list", ad, adl); :}
             | 
-            {: RESULT = null; :};
+            {: RESULT = new Node(""); :};
 
 command_with_semi ::= not_if_command:nic SEMI
-            {: RESULT = new Node("not if command", nic, new Node(";")); :};
+            {: RESULT = new Node("not if command", nic, new Node(";")); 
+                RESULT.copyTACInfo(nic); :};
 
 not_if_command ::= ret_stat:rs 
-            {: RESULT = rs; :}
+            {: RESULT = rs; 
+                RESULT.copyTACInfo(rs); :}
             | assign:a 
-            {: RESULT = a; :}
+            {: RESULT = a; 
+                RESULT.copyTACInfo(a); :}
             | method_call:mc
-            {: RESULT = mc; :};
+            {: RESULT = mc; 
+                RESULT.copyTACInfo(mc); :};
 
 command ::= command_with_semi:cws 
-            {: RESULT = cws; :}
+            {: RESULT = cws; 
+                RESULT.copyTACInfo(cws); :}
             | if_stmt:is
-            {: RESULT = is; :}
+            {: RESULT = is;
+                RESULT.copyTACInfo(is); :}
             | while_stmt:ws
-            {: RESULT = ws; :};
+            {: RESULT = ws;
+                RESULT.copyTACInfo(ws); :};
 
 commands ::= command:c 
-            {: RESULT = c; :}
+            {: RESULT = c; 
+                RESULT.copyTACInfo(c); :}
             | command:c commands:cs 
             {: RESULT = new Node("command list", c, cs); :}
             | 
-            {: RESULT = null; :};
+            {: RESULT = new Node(""); :};
 
 // if statement
 if_stmt ::= IF LPAREN exp_bool:eb RPAREN command:c else_stmt:es
-            {: RESULT = new Node("if", new Node("("), eb, new Node(")"), c, es); :};
+            {: RESULT = new Node("if", new Node("("), eb, new Node(")"), c, es); 
+                eb.labelTrue = getNewLabel();
+                String endIf = getNewLabel();
+                RESULT.code = "if " + eb.code + " goto(" + eb.labelTrue + ")\n" + 
+                    es.code + "\ngoto(" + endIf + ")\n" +
+                    eb.labelTrue + ":\n" +
+                    c.code + "\n" +
+                    endIf + ":\n"; 
+            :};
 
 else_stmt ::= 
-            {: RESULT = null; :}
+            {: RESULT = new Node(""); :}
             | ELSE command:c
-            {: RESULT = new Node("else", c); :};
+            {: RESULT = new Node("else", c); 
+                RESULT.copyTACInfo(c); :};
 
 // method declaration
 method_decl ::= method_type:mt IDENT:id LPAREN method_decl_args:mda RPAREN LCURLY commands:cs RCURLY
             {: RESULT = new Node("method decl", mt, new Node(id.toString()), new Node("("), mda, new Node(")"), new Node("{"), cs, new Node("}")); 
-                symbolTable.addFunction(id.toString(), mt.toString()); 
-            :};
+                symbolTable.addFunction(id.toString(), mt.toString()); :};
 
 method_decl_args ::= method_decl_val:mdv method_decl_args:mda 
             {: RESULT = new Node("method decl args", mdv, mda); :}
@@ -266,7 +311,7 @@ method_decl_list ::= method_decl:md
             | method_decl:md method_decl_list:mdl 
             {: RESULT = new Node("method decl list", md, mdl); :}
             | 
-            {: RESULT = null; :};
+            {: RESULT = new Node(""); :};
 
 // class declaration
 class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl main_decl:md method_decl_list:mdl RCURLY
@@ -279,4 +324,12 @@ main_decl ::= VOID MAIN LPAREN RPAREN LCURLY commands:cs RCURLY
 
 // while statement
 while_stmt ::= WHILE LPAREN exp_bool:eb RPAREN command:cm
-            {: RESULT = new Node("while stmt", new Node("("), eb, new Node(")"), cm); :};
+            {: RESULT = new Node("while stmt", new Node("("), eb, new Node(")"), cm); 
+                eb.labelTrue = getNewLabel();
+                eb.labelFalse = getNewLabel();
+                RESULT.code = eb.labelTrue + ": \n" + 
+                    "if not(" + eb.code + ") goto(" + eb.labelFalse + ")\n" +
+                    cm.code + "\n" + 
+                    "goto(" + eb.labelTrue + ")\n" + 
+                    eb.labelFalse + ": \n"; 
+            :};

@@ -6,8 +6,10 @@ public class Node {
     public  String value;
     public List<Node> children;
     // TAC info
-    public String code;
-    public String place;
+    public String code = "";
+    public String place = "";
+    public String labelTrue = "";
+    public String labelFalse = "";
 
     public Node(String value, List<Node> children) {
         this.value = value;

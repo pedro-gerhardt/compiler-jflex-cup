@@ -15,4 +15,4 @@ clean:
 	rm -rf gen
 
 test: 
-	java -cp util/java-cup-11b-20160615.jar:gen Main tests/code.in tests/ast.out tests/sym_tab.out
+	java -cp util/java-cup-11b-20160615.jar:gen Main tests/code.in tests/ast.out tests/sym_tab.out tests/int_code.out
