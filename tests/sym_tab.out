@@ -1,6 +1,8 @@
+teste: [int]
 func: function, [void]
 param: [int]
 attr2: [bool]
 NomeDaClasse: class
 attr1: [int]
+t1: int
 param2: [bool]

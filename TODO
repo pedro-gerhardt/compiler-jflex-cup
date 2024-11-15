@@ -6,5 +6,8 @@
  * add WHILE and MAIN to jflex 
 
 questions:
- - what should be in the symbol table? (name, type, scope, value)
- - temporary variables created during intermediate code generation should be included in the symbol table?
+ * what should be in the symbol table? (name, type, scope, value)
+    * just name and type
+ * temporary variables created during intermediate code generation should be included in the symbol table?
+    * yes
+ - how to generate a TAC from a variable being assigned from a method call?

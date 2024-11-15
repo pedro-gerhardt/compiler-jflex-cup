@@ -78,24 +78,32 @@ logic_oper ::= AND
 eq_rel_oper ::= EQEQ 
             {: RESULT = new Node("=="); :}
             | NOTEQ
-            {: RESULT = new Node("!="); :};
+            {: RESULT = new Node("!="); 
+                RESULT.place = "!="; :};
 
 bool_oper ::= logic_oper:lo
-            {: RESULT = lo; :} 
+            {: RESULT = lo; 
+                RESULT.copyTACInfo(lo); :} 
             | eq_rel_oper: ero
-            {: RESULT = ero; :};
+            {: RESULT = ero; 
+                RESULT.copyTACInfo(ero); :};
 
 num_rel_oper ::= GT 
-            {: RESULT = new Node(">"); :}
+            {: RESULT = new Node(">"); 
+                RESULT.place = ":"; :}
             | LT 
-            {: RESULT = new Node("<"); :}
+            {: RESULT = new Node("<"); 
+                RESULT.place = "<"; :}
             | eq_rel_oper:ero
-            {: RESULT = ero; :};
+            {: RESULT = ero; 
+                RESULT.copyTACInfo(ero); :};
 
 const_bool ::= TRUE:t
-            {: RESULT = new Node("True"); :}
+            {: RESULT = new Node("True"); 
+                RESULT.place = "True"; :}
             | FALSE
-            {: RESULT = new Node("False"); :};
+            {: RESULT = new Node("False");
+                RESULT.place = "False"; :};
 
 exp_bool ::= term_bool:tb 
             {: RESULT = tb; :}
@@ -118,39 +126,63 @@ factor_bool ::= NOT:not factor_bool:fb
 
 // arithmetic expression
 exp_arit ::= term_arit:ta 
-            {: RESULT = ta; :}
+            {: RESULT = ta; 
+                RESULT.copyTACInfo(ta); :}
             | term_arit:ta PLUS exp_arit:ea
-            {: RESULT = new Node("+", ta, ea); :};
+            {: RESULT = new Node("+", ta, ea); 
+                RESULT.place = symbolTable.getTempVar("int");
+                RESULT.code = RESULT.place + " := " + ta.place + " + " + ea.place; :};
 
 term_arit ::= factor_arit:fa 
-            {: RESULT = fa; :}
+            {: RESULT = fa; 
+                RESULT.copyTACInfo(fa); :}
             | factor_arit:fa TIMES term_arit:ta
-            {: RESULT = new Node("*", fa, ta); :};
+            {: RESULT = new Node("*", fa, ta); 
+                RESULT.place = symbolTable.getTempVar("int");
+                RESULT.code = RESULT.place + " := " + fa.place + " + " + ta.place; :};
 
 factor_arit ::= NUM:num
-            {: RESULT = new Node(num != null ? num.toString() : "num"); :}
+            {: RESULT = new Node(num != null ? num.toString() : "num"); 
+                System.out.println("++++++++++" + num.toString());
+                RESULT.place = num.toString(); :}
             | IDENT:id
-            {: RESULT = new Node(id != null ? id.toString() : "id"); :}            
+            {: RESULT = new Node(id != null ? id.toString() : "id");
+                symbolTable.existVariable(id.toString());
+                RESULT.place = id.toString();
+            :}            
             | method_call:mc 
-            {: RESULT = mc; :}
+            {: RESULT = mc; 
+                RESULT.place = mc.place;
+            :}
             | LPAREN exp_arit:ea RPAREN
-            {: RESULT = new Node("arit expr", new Node("("), ea, new Node(")")); :};
+            {: RESULT = new Node("arit expr", new Node("("), ea, new Node(")")); 
+                RESULT.place = symbolTable.getTempVar("int");
+                RESULT.code = RESULT.place + " := " + ea.place; :};
 
 // return
 ret_stat ::= RETURN ret_val:rv
             {: RESULT = new Node("return", rv); :};
 ret_val ::= exp_bool:eb 
-            {: RESULT = eb; :}
+            {: RESULT = eb; 
+                RESULT.copyTACInfo(eb);
+            :}
             | exp_arit:ea
-            {: RESULT = ea; :};
+            {: RESULT = ea; 
+                RESULT.copyTACInfo(ea);
+            :};
 
 // assign
 assign ::= IDENT:id EQ ret_val:rv
-            {: RESULT = new Node("assign", new Node(id != null ? id.toString() : "id"), new Node("="), rv); :};
+            {: RESULT = new Node("assign", new Node(id != null ? id.toString() : "id"), new Node("="), rv); 
+                RESULT.place = symbolTable.getVariable(id.toString());
+                RESULT.code = RESULT.place + " := " + rv.place; :};
 
 // method_call
 method_call ::= IDENT:id LPAREN method_call_args:mca RPAREN
-            {: RESULT = new Node("method call", new Node(id != null ? id.toString() : "id"), new Node("("), mca, new Node(")")); :};
+            {: RESULT = new Node("method call", new Node(id != null ? id.toString() : "id"), new Node("("), mca, new Node(")")); 
+                RESULT.place = id.toString() + "()";
+                RESULT.code = "";
+            :};
 
 method_call_args ::= method_call_val:mcv method_call_args:mca
             {: RESULT = new Node("method call args", mcv, mca); :}
@@ -169,6 +201,7 @@ method_call_val ::= IDENT:id
 // attribute declaration 
 attr_decl ::= type:t IDENT:id SEMI
             {:  RESULT = new Node("attr_decl", t, new Node(id != null ? id.toString() : "id"), new Node(";"));
+                RESULT.place = id.toString();
                 symbolTable.addVariable(id.toString(), t.toString()); :};
 
 attr_decl_list ::= attr_decl:ad 

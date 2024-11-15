@@ -16,7 +16,3 @@ clean:
 
 test: 
 	java -cp util/java-cup-11b-20160615.jar:gen Main tests/code.in tests/ast.out tests/sym_tab.out
-	
-	cat tests/ast.out
-	
-	cat tests/sym_tab.out
