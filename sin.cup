@@ -1,6 +1,9 @@
 import java_cup.runtime.*;
+import java.util.HashMap;
 
 parser code {:
+    SymbolTable symbolTable = new SymbolTable();
+
     public void report_error(String message, Object info) {
         StringBuilder m = new StringBuilder("Error");
 
@@ -166,8 +169,7 @@ method_call_val ::= IDENT:id
 // attribute declaration 
 attr_decl ::= type:t IDENT:id SEMI
             {:  RESULT = new Node("attr_decl", t, new Node(id != null ? id.toString() : "id"), new Node(";"));
-                RESULT.setAsVarDeclaration(id.toString(), t.toString());
-            :};
+                symbolTable.addVariable(id.toString(), t.toString()); :};
 
 attr_decl_list ::= attr_decl:ad 
             {: RESULT = ad; :}
@@ -212,7 +214,7 @@ else_stmt ::=
 // method declaration
 method_decl ::= method_type:mt IDENT:id LPAREN method_decl_args:mda RPAREN LCURLY commands:cs RCURLY
             {: RESULT = new Node("method decl", mt, new Node(id.toString()), new Node("("), mda, new Node(")"), new Node("{"), cs, new Node("}")); 
-                RESULT.setAsFuncDeclaration(id.toString(), mt.toString());
+                symbolTable.addFunction(id.toString(), mt.toString()); 
             :};
 
 method_decl_args ::= method_decl_val:mdv method_decl_args:mda 
@@ -224,7 +226,7 @@ method_decl_args ::= method_decl_val:mdv method_decl_args:mda
 
 method_decl_val ::= type:t IDENT:id
             {: RESULT = new Node("method decl val", t, new Node(id.toString()));
-                RESULT.setAsVarDeclaration(id.toString(), t.toString()); :};
+                symbolTable.addVariable(id.toString(), t.toString()); :};
 
 method_decl_list ::= method_decl:md
             {: RESULT = md; :}
@@ -236,8 +238,7 @@ method_decl_list ::= method_decl:md
 // class declaration
 class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl main_decl:md method_decl_list:mdl RCURLY
             {: RESULT = new Node("class decl", new Node("class"), new Node(id.toString()), new Node("{"), adl, md, mdl, new Node("}"));
-                RESULT.setAsClassDeclaration(id.toString());
-             :};
+                symbolTable.addClass(id.toString()); :};
 
 // main function
 main_decl ::= VOID MAIN LPAREN RPAREN LCURLY commands:cs RCURLY

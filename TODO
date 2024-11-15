@@ -7,3 +7,4 @@
 
 questions:
  - what should be in the symbol table? (name, type, scope, value)
+ - temporary variables created during intermediate code generation should be included in the symbol table?

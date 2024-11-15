@@ -1,11 +1,5 @@
 import java.io.*;
 
-// import gen.classes.parser;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
 public class Main {
     public static void main(String[] argv) {
         try {
@@ -19,8 +13,8 @@ public class Main {
             String tree = result.getTree(result, "");
             writeStringToFile(tree, ast_out);
 
-            String sym_tab = result.getSymbolTable(result);
-            writeStringToFile(sym_tab, sym_tab_out);
+            String symTab = p.symbolTable.getTable();
+            writeStringToFile(symTab, sym_tab_out);
             
             System.out.println("Successful compilation!");
         } catch (Exception e) {
