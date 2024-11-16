@@ -1,6 +1,8 @@
 all: compile test
 
-compile: 
+compile:
+	clear
+
 	mkdir -p gen/classes
 
 	jflex -d gen/classes lex.flex

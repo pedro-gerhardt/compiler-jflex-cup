@@ -16,21 +16,22 @@ public class Main {
 
             String tree = result.getTree(result, "");
             writeStringToFile(tree, ast_out);
-            System.out.println("Abstract Syntactic Tree: ");
-            System.out.println(tree);
+            // System.out.println("Abstract Syntactic Tree: ");
+            // System.out.println(tree);
 
-            System.out.println("\n\n\n");
+            // System.out.println("\n\n\n");
 
             String symTab = p.symbolTable.getTable();
             writeStringToFile(symTab, sym_tab_out);
-            System.out.println("Symbol Table: ");
-            System.out.println(symTab);
+            // System.out.println("Symbol Table: ");
+            // System.out.println(symTab);
             
-            System.out.println("\n\n\n");
+            // System.out.println("\n\n\n");
 
-            String tacs = result.getTACs();
+            // String tacs = result.getTACs();
             System.out.println("TACs: ");
-            System.out.println(tacs);
+            // System.out.println(tacs);
+            System.out.println(result.code);
             // writeStringToFile(tree, ast_out);
 
             System.out.println("Successful compilation!");

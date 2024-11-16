@@ -5,6 +5,7 @@ CHANGE GENERAL IDEIA OF CODE: instead of get all the code from the nodes in a re
  - remove [] from variable types in symbol table
  - update README.md
 
+ + take a look on possible optimization: in the (exp_bool) and (exp_arit) scenarios, instead of creating a new node with a new temp variable just to assign one to another, just copy the all the infos, including the temp variable
  + resolve grammar conflicts
  + implement pre function declaration (before main), so functions return value will be known
 
