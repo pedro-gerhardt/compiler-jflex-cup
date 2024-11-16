@@ -1,0 +1,58 @@
+
+fn_main:
+t1 := attr1 + attr2
+x := t1
+t2 := call func
+
+fn_func:
+if (False) goto(L1)
+t3 := 2 + 33
+teste := t3
+goto(L2)
+
+L1:
+teste := 1
+goto(L2)
+
+L2:
+t4 := x + 1
+x := t4
+t5 := True and False
+t6 := t5
+t7 := not t6
+teste := t7
+t8 := 1 + 3
+t9 := t8
+t10 := t9 + 4
+teste := t10
+t11 := 5 + 6
+t12 := True == False
+param t11
+param t12
+t13 := call teste
+t14 := t13 + 1
+return t14
+t15 := 1 + 1
+t16 := not True
+param t15
+param t16
+t17 := call func
+t18 := 1 + 1
+t19 := 1 == 2
+param t18
+param t19
+t20 := call func
+t21 := call func
+t22 := 1 + t21
+teste := t22
+
+L3: 
+t23 := x > 0
+if not(t23) goto(L4)
+t24 := x + 1
+x := t24
+goto(L3)
+
+L4: 
+t25 := 1 + 1
+return t25

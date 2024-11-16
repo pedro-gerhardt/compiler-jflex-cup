@@ -3,8 +3,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Node {
-    private String value;
-    private List<Node> children;
+    public String value;
+    public List<Node> children;
+    // TAC info
+    public String code = "";
+    public String place = "";
+    public String labelTrue = "";
+    public String labelFalse = "";
 
     public Node(String value, List<Node> children) {
         this.value = value;
@@ -38,6 +43,11 @@ public class Node {
         }
         return ret;
     }
+
+    public void copyTACInfo(Node node) {
+        this.code = node.code;
+        this.place = node.place;
+    } 
 
     @Override
     public String toString() {

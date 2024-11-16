@@ -25,12 +25,25 @@ public class SymbolTable {
         symbolTable.put(name, "function, " + type);
     }
 
+    public void addConstant(String name, String type) {
+        symbolTable.put(name, "constant, " + type);
+    }
+
     public void addClass(String name) {
         symbolTable.put(name, "class");
     }
 
-    public String getVariable(String name) {
-        return symbolTable.get(name);
+    public String getSymbolType(String name) throws Exception {
+        String type = symbolTable.get(name);
+        if (type == null)
+            throw new Exception("Variable " + name + " is undeclared!");
+        return type;
+    }
+
+    public boolean existVariable(String name) throws Exception {
+        if (symbolTable.containsKey(name))
+            return true;
+        throw new Exception("Variable " + name + " is undeclared!");
     }
 
     public void printTable() {

@@ -1,10 +1,32 @@
- - create TACs as intermediate code for commands 
- - update README.md
+TODO captions:
+ - up to do
+ + maybe
+ * done
 
+TODO LIST:
+ + take a look on possible optimization: in the (exp_bool) and (exp_arit) scenarios, instead of creating a new node with a new temporary variable just to assign one to another, just copy the all the infos, including the temporary variable
+ + resolve grammar conflicts
+ + implement pre function declaration (before main), so functions return value will be known
+
+ * remove [] from variable types in symbol table
+ * write to a output test file the intermediate code generated 
+ * update README.md
+ * deal with inverted order on functions tac
+   * solved by storing the childrens codes in the father code and, in the end, just assessing the root nodes code
+ * create TACs as intermediate code for commands 
  * create symbol table for variable and functions declarations
  * handle WHILE and MAIN in grammar cup, appending them to ast
  * add WHILE and MAIN to jflex 
 
 questions:
- - what should be in the symbol table? (name, type, scope, value)
- - temporary variables created during intermediate code generation should be included in the symbol table?
+ * what should be in the symbol table? (name, type, scope, value)
+    * just name and type
+ * temporary variables created during intermediate code generation should be included in the symbol table?
+    * yes
+ * how to generate a TAC from a variable being assigned from a method call?
+    * not expected such operation in grammar definition, so it will not be implemented
+ * how to implement the return operation from a function call in tac?
+    * a temporary variable is assigned to the functions call
+
+important note:
+CHANGE GENERAL IDEIA OF CODE: instead of get all the codes from the nodes in a recursive search after the ast is built, leaving a bunch of intermediate nodes with no code, store all the childrens codes in the father code, so in the end all that it will takes is print the code from the root node 
