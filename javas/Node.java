@@ -8,8 +8,6 @@ public class Node {
     // TAC info
     public String code = "";
     public String place = "";
-    public boolean isFunction = false;
-    public boolean isWhile = false;
     public String labelTrue = "";
     public String labelFalse = "";
 
@@ -50,28 +48,6 @@ public class Node {
         this.code = node.code;
         this.place = node.place;
     } 
-
-    public String getTACs() {
-        String ret = "";
-        if (this.code != null && this.code != "" && this.isFunction)
-            ret += this.code + "\n";
-        if (!this.isWhile) {
-            for (Node child : this.children){
-                ret += child.getTACs();
-            }
-        }
-        if (this.code != null && this.code != "" && !this.isFunction)
-            ret += this.code + "\n";
-        return ret;
-    } 
-
-    public void setAsFunction() {
-        this.isFunction = true;
-    }
-
-    public void setAsWhile() {
-        this.isWhile = true;
-    }
 
     @Override
     public String toString() {

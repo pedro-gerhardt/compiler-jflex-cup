@@ -115,10 +115,12 @@ num_rel_oper ::= GT
 
 const_bool ::= TRUE:t
             {: RESULT = new Node("True"); 
+                RESULT.place = "True"; 
                 RESULT.place = "True"; :}
             | FALSE
             {: RESULT = new Node("False");
-                RESULT.place = "False"; :};
+                RESULT.place = "False";
+                RESULT.code = "False"; :};
 
 exp_bool ::= term_bool:tb 
             {: RESULT = tb; :}
@@ -181,11 +183,7 @@ factor_arit ::= NUM:num
 // return
 ret_stat ::= RETURN ret_val:rv
             {: RESULT = new Node("return", rv); 
-                RESULT.code = rv.code + "return " + rv.place + "\n"; 
-                System.out.println("-------(rv)-----");
-                System.out.println(RESULT.code + "\n\n");
-                System.out.println(rv.code + "\n\n");
-                System.out.println("----------------");:};
+                RESULT.code = rv.code + "return " + rv.place + "\n"; :};
 ret_val ::= exp_bool:eb 
             {: RESULT = eb; :}
             | exp_arit:ea
@@ -218,15 +216,13 @@ method_call_args ::=
 
 method_call_val ::= ret_val:rv 
             {: RESULT = rv;
-                RESULT.place = "param " + rv.place + "\n"; 
-                
-                :};
+                RESULT.place = "param " + rv.place + "\n"; :};
 
 // attribute declaration 
 attr_decl ::= type:t IDENT:id SEMI
             {:  RESULT = new Node("attr_decl", t, new Node(id != null ? id.toString() : "id"), new Node(";"));
                 RESULT.place = id.toString();
-                symbolTable.addVariable(id.toString(), t.toString()); :};
+                symbolTable.addVariable(id.toString(), t.value.toString()); :};
 
 attr_decl_list ::= attr_decl:ad 
             {: RESULT = ad; :}
@@ -263,18 +259,26 @@ commands ::= command:c
 
 // if statement
 if_stmt ::= IF LPAREN exp_bool:eb RPAREN command:c else_stmt:es
-            {: RESULT = new Node("if", new Node("("), eb, new Node(")"), c, es); :};
+            {: RESULT = new Node("if", new Node("("), eb, new Node(")"), c, es); 
+                eb.labelTrue = getNewLabel();
+                String endIf = getNewLabel();
+                RESULT.code = "if (" + eb.code + ") goto(" + eb.labelTrue + ")\n" + 
+                    es.code + "goto(" + endIf + ")\n\n" +
+                    eb.labelTrue + ":\n" +
+                    c.code +
+                    "goto(" + endIf + ")\n\n" + 
+                    endIf + ":\n"; :};
 
 else_stmt ::= 
             {: RESULT = null; :}
             | ELSE command:c
-            {: RESULT = new Node("else", c); :};
+            {: RESULT = new Node("else", c); 
+                RESULT.copyTACInfo(c); :};
 
 // method declaration
 method_decl ::= method_type:mt IDENT:id LPAREN method_decl_args:mda RPAREN LCURLY commands:cs RCURLY
             {: RESULT = new Node("method decl", mt, new Node(id.toString()), new Node("("), mda, new Node(")"), new Node("{"), cs, new Node("}")); 
-                symbolTable.addFunction(id.toString(), mt.toString()); 
-                RESULT.setAsFunction();
+                symbolTable.addFunction(id.toString(), mt.value.toString()); 
                 RESULT.place = id.toString();
                 RESULT.code = "\nfn_" + id.toString() + ":\n" + cs.code; :};
 
@@ -287,7 +291,7 @@ method_decl_args ::= method_decl_val:mdv method_decl_args:mda
 
 method_decl_val ::= type:t IDENT:id
             {: RESULT = new Node("method decl val", t, new Node(id.toString()));
-                symbolTable.addVariable(id.toString(), t.toString()); :};
+                symbolTable.addVariable(id.toString(), t.value.toString()); :};
 
 method_decl_list ::= method_decl:md
             {: RESULT = md; :}
@@ -306,7 +310,6 @@ class_decl ::= CLASS IDENT:id LCURLY attr_decl_list:adl main_decl:md method_decl
 main_decl ::= VOID MAIN LPAREN RPAREN LCURLY commands:cs RCURLY
             {: RESULT = new Node("main method decl", new Node("void"), new Node("main"), new Node("("), new Node(")"), new Node("{"), cs, new Node("}")); 
                 symbolTable.addFunction("main", "void");
-                RESULT.setAsFunction();
                 RESULT.place = "main";
                 RESULT.code = "\nfn_main:\n" + cs.code; :};
 
@@ -320,5 +323,4 @@ while_stmt ::= WHILE LPAREN exp_bool:eb RPAREN command:cm
                     "if not(" + eb.place + ") goto(" + eb.labelFalse + ")\n" + 
                     cm.code + 
                     "goto(" + eb.labelTrue + ")\n\n" + 
-                    eb.labelFalse + ": \n"; 
-            :};
+                    eb.labelFalse + ": \n"; :};

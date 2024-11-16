@@ -15,4 +15,5 @@ jflex and java jdk installed
 - grammar specification: sin.cup
 - input code test file: tests/code.in 
 - output ast file: tests/ast.out 
-- output symbol table file: tests/sym_tab.out 
+- output symbol table file: tests/sym_tab.out
+- output intermediate code file: tests/int_code.out
