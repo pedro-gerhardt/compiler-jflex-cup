@@ -33,11 +33,11 @@ public class SymbolTable {
         symbolTable.put(name, "class");
     }
 
-    public String getVariable(String name) throws Exception {
-        String variable = symbolTable.get(name);
-        if (variable == null)
+    public String getSymbolType(String name) throws Exception {
+        String type = symbolTable.get(name);
+        if (type == null)
             throw new Exception("Variable " + name + " is undeclared!");
-        return variable;
+        return type;
     }
 
     public boolean existVariable(String name) throws Exception {

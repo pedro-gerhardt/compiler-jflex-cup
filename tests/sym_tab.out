@@ -1,8 +1,24 @@
+t4: bool
 teste: [int]
-func: function, [void]
-param: [int]
+t5: int
+t6: bool
+t7: return
+t8: int
+t9: return
+main: function, void
 attr2: [bool]
 NomeDaClasse: class
 attr1: [int]
-t1: int
 param2: [bool]
+t10: int
+t12: bool
+func: function, [void]
+param: [int]
+t11: int
+t14: int
+t13: return
+t16: return
+t15: bool
+t1: return
+t2: bool
+t3: bool

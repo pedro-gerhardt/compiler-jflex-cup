@@ -4,10 +4,15 @@ class NomeDaClasse {
     int teste;
 
     void main() {
-        func(1, 2);
+        func();
     }
 
     void func(int param, bool param2) { 
-        return param + param2;
+        teste = not (True and False); 
+        return teste(1 + 3, True == False) + 1; 
+        teste = 1 + func();
+        func(1 + 1, not True); 
+        func(1 + 1, 1 == 2); 
     }
+
 }

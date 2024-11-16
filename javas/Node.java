@@ -3,11 +3,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Node {
-    public  String value;
+    public String value;
     public List<Node> children;
     // TAC info
-    public String code;
-    public String place;
+    public String code = "";
+    public String place = "";
+    public boolean isFunction = false;
 
     public Node(String value, List<Node> children) {
         this.value = value;
@@ -49,13 +50,19 @@ public class Node {
 
     public String getTACs() {
         String ret = "";
-        if (this.code != null && this.code != "")
+        if (this.code != null && this.code != "" && this.isFunction)
             ret += this.code + "\n";
         for (Node child : this.children){
             ret += child.getTACs();
         }
+        if (this.code != null && this.code != "" && !this.isFunction)
+            ret += this.code + "\n";
         return ret;
     } 
+
+    public void setAsFunction() {
+        this.isFunction = true;
+    }
 
     @Override
     public String toString() {

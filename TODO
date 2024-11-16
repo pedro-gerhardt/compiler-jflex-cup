@@ -1,5 +1,10 @@
  - create TACs as intermediate code for commands 
+ - deal with inverted order on functions tac
+ - remove [] from variable types in symbol table
  - update README.md
+
+ + resolve grammar conflicts
+ + implement pre function declaration (before main), so functions return value will be known
 
  * create symbol table for variable and functions declarations
  * handle WHILE and MAIN in grammar cup, appending them to ast
@@ -10,4 +15,6 @@ questions:
     * just name and type
  * temporary variables created during intermediate code generation should be included in the symbol table?
     * yes
- - how to generate a TAC from a variable being assigned from a method call?
+ * how to generate a TAC from a variable being assigned from a method call?
+    * not expected such operation in grammar definition, so it will not be implemented
+ - how to implement the return operation from a function call in tac?
