@@ -2,6 +2,7 @@ class NomeDaClasse {
     int attr1;
     bool attr2;
     int teste;
+    int x;
 
     void main() {
         func();
@@ -10,9 +11,11 @@ class NomeDaClasse {
     void func(int param, bool param2) { 
         teste = not (True and False); 
         return teste(1 + 3, True == False) + 1; 
-        teste = 1 + func();
         func(1 + 1, not True); 
         func(1 + 1, 1 == 2); 
+        teste = 1 + func();
+        teste = x > 0;
+        while (x > 0) x = 1;    
+        return teste;
     }
-
 }

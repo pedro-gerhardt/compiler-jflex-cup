@@ -4,6 +4,11 @@ import java.util.HashMap;
 parser code {:
     SymbolTable symbolTable = new SymbolTable();
 
+    int labelCount = 1;
+    public String getNewLabel() {
+        return "L" + labelCount++;
+    }
+    
     public void report_error(String message, Object info) {
         StringBuilder m = new StringBuilder("Error");
 
@@ -51,6 +56,7 @@ non terminal Node method_decl, method_decl_args, method_decl_val;
 non terminal Node command, commands, command_with_semi, not_if_command;
 non terminal Node class_decl;
 non terminal Node main_decl, while_stmt;
+non terminal Node constant;
 
 start with program;
 
@@ -114,10 +120,18 @@ exp_bool ::= term_bool:tb
 
 term_bool ::= factor_bool:fb
             {: RESULT = fb; :}
-            | NUM:num1 num_rel_oper:nro NUM:num2
-            {: RESULT = new Node(nro != null ? nro.toString() : "num rel oper", new Node(num1 != null ? num1.toString() : "num1"), new Node(num2 != null ? num2.toString() : "num2")); 
+            | constant:c1 num_rel_oper:nro constant:c2
+            {: RESULT = new Node(nro != null ? nro.toString() : "num rel oper", c1, c2); 
                 RESULT.place = symbolTable.getTempVar("bool");
-                RESULT.code = RESULT.place + " := " + num1.toString() + " " + nro.place + " " + num2.toString(); :};
+                RESULT.code = RESULT.place + " := " + c1.place + " " + nro.place + " " + c2.place; :};
+
+constant ::= NUM:num
+            {: RESULT = new Node(num.toString()); 
+                RESULT.place = num.toString(); :}
+            | IDENT:id
+            {: RESULT = new Node(id.toString()); 
+                symbolTable.existVariable(id.toString());
+                RESULT.place = id.toString(); :};
 
 factor_bool ::= NOT:not factor_bool:fb 
             {: RESULT = new Node("not", fb); 
@@ -213,7 +227,8 @@ attr_decl_list ::= attr_decl:ad
             {: RESULT = null; :};
 
 command_with_semi ::= not_if_command:nic SEMI
-            {: RESULT = new Node("not if command", nic, new Node(";")); :};
+            {: RESULT = new Node("not if command", nic, new Node(";")); 
+                RESULT.place = nic.place; :};
 
 not_if_command ::= ret_stat:rs 
             {: RESULT = rs; :}
@@ -286,4 +301,13 @@ main_decl ::= VOID MAIN LPAREN RPAREN LCURLY commands:cs RCURLY
 
 // while statement
 while_stmt ::= WHILE LPAREN exp_bool:eb RPAREN command:cm
-            {: RESULT = new Node("while stmt", new Node("("), eb, new Node(")"), cm); :};
+            {: RESULT = new Node("while stmt", new Node("("), eb, new Node(")"), cm); 
+                eb.labelTrue = getNewLabel();
+                eb.labelFalse = getNewLabel();
+                RESULT.code = "\n" + eb.labelTrue + ": \n" + 
+                    eb.code + "\n" +
+                    "if not(" + eb.place + ") goto(" + eb.labelFalse + ")\n" + 
+                    cm.code + "\n" + 
+                    "goto(" + eb.labelTrue + ")\n" + 
+                    "\n" + eb.labelFalse + ": "; 
+            :};

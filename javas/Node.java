@@ -9,6 +9,9 @@ public class Node {
     public String code = "";
     public String place = "";
     public boolean isFunction = false;
+    public boolean isWhile = false;
+    public String labelTrue = "";
+    public String labelFalse = "";
 
     public Node(String value, List<Node> children) {
         this.value = value;
@@ -52,8 +55,10 @@ public class Node {
         String ret = "";
         if (this.code != null && this.code != "" && this.isFunction)
             ret += this.code + "\n";
-        for (Node child : this.children){
-            ret += child.getTACs();
+        if (!this.isWhile) {
+            for (Node child : this.children){
+                ret += child.getTACs();
+            }
         }
         if (this.code != null && this.code != "" && !this.isFunction)
             ret += this.code + "\n";
@@ -62,6 +67,10 @@ public class Node {
 
     public void setAsFunction() {
         this.isFunction = true;
+    }
+
+    public void setAsWhile() {
+        this.isWhile = true;
     }
 
     @Override

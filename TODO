@@ -1,3 +1,5 @@
+CHANGE GENERAL IDEIA OF CODE: instead of get all the code from the nodes in a recursive search after the ast is built, leaving a bunch of intermediate nodes with no code, store all the childrens codes in the father code, so in the end all that it will takes is print the code from the root node 
+
  - create TACs as intermediate code for commands 
  - deal with inverted order on functions tac
  - remove [] from variable types in symbol table
